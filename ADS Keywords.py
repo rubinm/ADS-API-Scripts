@@ -8,8 +8,6 @@ import csv
 import time
 import pprint
 from unidecode import unidecode
-import matplotlib
-import pandas
 
 devkey = (open('dev_key.txt','r')).read()
 
@@ -45,8 +43,6 @@ writer = csv.writer(freqlist, delimiter='|', lineterminator='\n', quotechar='"',
 writer.writerows(freq.items())
 freqlist.close()
 print 'finished getting frequency distribution'
-
-import csv
 
 out = open('frequency.csv', 'w')
 csv_out = csv.writer((out), lineterminator='\n', delimiter=',')
