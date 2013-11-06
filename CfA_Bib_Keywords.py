@@ -11,7 +11,7 @@ from unidecode import unidecode
 
 devkey = (open('dev_key.txt','r')).read()
 
-text = open('keywords.txt','a')
+text = open('keywords.txt','w')
 for y in range(2010, 2014):
     for m in range(1,13): # first number is starting month, last number needs to be one more than final month
         url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
