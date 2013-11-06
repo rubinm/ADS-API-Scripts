@@ -11,48 +11,73 @@ from unidecode import unidecode
 
 devkey = (open('dev_key.txt','r')).read()
 
-text = open('keywords.txt','a')
-for y in range(2010, 2014):
-    for m in range(1,13): # first number is starting month, last number needs to be one more than final month
-        url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
-        #print url
-        content = requests.get(url)
-        k=content.json()
-        #pprint.pprint(k)
-        docs = k['results']['docs']        
-        for i in docs:
-            try:
-                mywords=i['keyword']
-                myList = list(set(mywords)) #magic line that removes exact duplicates from an articles keywords
-                text.write(str(y)+'|'+str(m)+'|'+('\n'+str(y)+'|'+str(m)+'|').join(myList)+'\n')
-            except KeyError:
-                pass
-            except UnicodeEncodeError:
-                pass
-        time.sleep(1)
-text.close()
-print 'finished getting keywords'
+bib = open('cfa_bib_list.txt').read()
+w = open('abstract.txt','w')
 
-text = open('keywords.txt','r').read()
-freqlist = open('freqlist.txt','wb')
-lowertext = text.lower()
-lines = LineTokenizer(blanklines='discard').tokenize(lowertext)
-freq = nltk.FreqDist(lines)
-#print freq
-writer = csv.writer(freqlist, delimiter='|', lineterminator='\n', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-writer.writerows(freq.items())
-freqlist.close()
-print 'finished getting frequency distribution'
+bib1 = bib.splitlines()
+bib_lines = [x.strip() for x in bib1]
 
-out = open('frequency.csv', 'w')
-csv_out = csv.writer((out), lineterminator='\n', delimiter=',')
-csv_out.writerow(["Year","Month","Keyword","Frequency"])
-f = open('freqlist.txt')
-for line in f:
-  vals = line.split('|')
-  words = [v.replace('\n', '') for v in vals]
-  words1 = [v.replace('"', '') for v in words]
-  csv_out.writerow((words1[0], words1[1], words1[2], words1[3]))
-f.close()
-out.close()
-print 'finished writing csv file'
+for i in bib_lines:
+    url = 'http://labs.adsabs.harvard.edu/adsabs/api/record/'+i+'?fmt=json&dev_key='+str(devkey)
+    
+    authors = ''
+    title = ''
+    affil = ''
+    year = ''
+    pub = ''
+    abstract = ''
+    
+    content = requests.get(url)
+    k=content.json()
+
+    year = k['year']
+    w.write(year+'|')
+    
+    try:
+        pub = k['pub']
+        w.write(pub+'|')
+    except KeyError:
+        w.write(pub+'|')
+    
+    try:
+        title = k['title']
+        title2 = '; '.join(title)
+        cleantitle = title2.encode('ascii', 'ignore')
+        w.write(cleantitle+'|')
+    except KeyError:
+        w.write(title+'|')
+    
+    try:
+        authors = k['author']
+        author2 = '; '.join(authors)
+        cleanauthors = author2.encode('ascii', 'ignore')
+        w.write(cleanauthors+'|')
+    except KeyError:
+        w.write(authors+'|')
+ 
+    try:        
+        affil = k['aff']
+        affil2 = '; '.join(affil)
+        cleanaffil = affil2.encode('ascii', 'ignore')
+        w.write(cleanaffil+'|')
+    except KeyError:
+        w.write(affil+'|')
+    
+    try:
+        abstract = k['abstract']
+        cleanabstract = abstract.encode('ascii', 'ignore')
+        w.write(cleanabstract+'|')
+    except KeyError:
+        w.write(abstract+'|')
+
+    #print abstract
+    #print authors
+    #print title
+    #print year
+    print i
+    
+    w.write(i+'|\n')
+    
+    time.sleep(2)
+print 'finished'
+w.close()
