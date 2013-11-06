@@ -6,19 +6,17 @@ import nltk
 from nltk.tokenize import LineTokenizer
 import csv
 import time
-import pprint
 from unidecode import unidecode
 
 devkey = (open('dev_key.txt','r')).read()
 
 text = open('keywords.txt','w')
-for y in range(2010, 2014):
-    for m in range(1,13): # first number is starting month, last number needs to be one more than final month
+for y in range(2010, 2014): #year range you wish to scrape, the ending number should be one more than your final year (i.e. range(2010,2014) will get info on years 2010, 2011, 2012, 2013)
+    for m in range(1,13): #first number is starting month, last number needs to be one more than final month
         url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
         #print url
         content = requests.get(url)
         k=content.json()
-        #pprint.pprint(k)
         docs = k['results']['docs']        
         for i in docs:
             try:
@@ -28,7 +26,7 @@ for y in range(2010, 2014):
                 cleanmyList = myList2.encode('ascii', 'ignore') #ignores ascii characters
                 text.write(cleanmyList+'\n')
             except KeyError:
-                #this error occurs when the paper has no keywords
+                #the exception is telling the script to just go on even though the paper had no keywords
                 pass
         time.sleep(1)
 text.close()
