@@ -24,10 +24,11 @@ for y in range(2010, 2014):
             try:
                 mywords=i['keyword']
                 myList = list(set(mywords)) #magic line that removes exact duplicates from an articles keywords
-                text.write(str(y)+'|'+str(m)+'|'+('\n'+str(y)+'|'+str(m)+'|').join(myList)+'\n')
+                myList2 = str(y)+'|'+str(m)+'|'+('\n'+str(y)+'|'+str(m)+'|').join(myList)
+                cleanmyList = myList2.encode('ascii', 'ignore') #ignores ascii characters
+                text.write(cleanmyList+'\n')
             except KeyError:
-                pass
-            except UnicodeEncodeError:
+                #this error occurs when the paper has no keywords
                 pass
         time.sleep(1)
 text.close()
