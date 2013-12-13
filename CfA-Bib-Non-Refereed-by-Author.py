@@ -11,7 +11,7 @@ authors = open('authors.txt').read() #one author per line, in format: Kurtz,+M
 
 authors_lines = authors.splitlines()
 
-out = open('louise.txt', 'w')
+out = open('articles_out.txt', 'w')
 out.write("Bibcode|Year|Month|Authors|Affiliation|Title|Database"+"\n")
 
 for i in authors_lines:
@@ -19,6 +19,7 @@ for i in authors_lines:
         for m in range(1,5): #first number is starting month, last number needs to be one more than final month
             url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,author:"'+i+'",pubdate:'+str(y)+'-'+str(m)+'&filter=property:not_refereed&rows=200&fmt=json&dev_key='+str(devkey)
             #above api request finds only CfA bibliography non-refereed papers.
+            print url #printing url for troubleshooting
             content = requests.get(url)
             k=content.json()
             
@@ -62,7 +63,6 @@ for i in authors_lines:
                     year = ''                              
                 
                 row = bibcode+'|'+year+'|'+str(m)+'|'+authorlist+'|'+affillist+'|'+titleclean+'|'+databaseclean+'\n'
-                print row
                 out.write(row)    
         time.sleep(1)
 out.close()
