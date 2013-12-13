@@ -2,17 +2,16 @@
 
 import requests
 import json
-import csv
 import time
 from unidecode import unidecode
 
-devkey = (open('dev_key.txt','r')).read()
+devkey = (open('dev_key.txt','r')).read() #txt file that only has your dev key
 
 authors = open('authors.txt').read() #one author per line, in format: Kurtz,+M
 
 authors_lines = authors.splitlines()
 
-out = open('louise.txt', 'w')
+out = open('articles_out.txt', 'w')
 out.write("Bibcode|Year|Month|Authors|Affiliation|Title|Database"+"\n")
 
 for i in authors_lines:
@@ -26,6 +25,7 @@ for i in authors_lines:
             
             docs = k['results']['docs']
             for x in docs:
+                #caputre all desired information
                 bibcode=x['bibcode']
                 pubdate=x['pubdate']
                 affil=x['aff']
@@ -35,17 +35,16 @@ for i in authors_lines:
                 author=x['author']
                 year=x['year']
 
+                #converting lists into strings, and cleaning up unicode where needed
                 databaseclean = ('').join(database)
-  
                 titleclean = unidecode(('').join(title))
-    
                 authorlist = unidecode(('; ').join(author))
-
                 affillist = unidecode(('; ').join(affil))              
                 
+                #putting all the variables together into one long string
                 row = bibcode+'|'+year+'|'+str(m)+'|'+authorlist+'|'+affillist+'|'+titleclean+'|'+databaseclean+'\n'
-                print row
-                out.write(row)    
+                print row #print each string for error tracking
+                out.write(row) #write each line to the txt file
         time.sleep(1)
 out.close()
 print 'finished writing text file'
