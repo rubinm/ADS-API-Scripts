@@ -17,7 +17,7 @@ for i in authors_lines:
         for m in range(1,2): #first number is starting month, last number needs to be one more than final month
             url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,author:"'+i+'",pubdate:'+str(y)+'-'+str(m)+'&filter=property:not_refereed&rows=200&fmt=json&dev_key='+str(devkey)
             #above api request finds only CfA bibliography non-refereed papers.
-			print url #printing url for troubleshooting
+	    print url #printing url for troubleshooting
             content = requests.get(url)
             k=content.json()
             
