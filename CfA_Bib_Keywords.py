@@ -36,7 +36,7 @@ class UnicodeWriter:
 
 devkey = (open('dev_key.txt','r')).read()
 
-text = codecs.open('keywords.txt','a')
+text = codecs.open('keywords.txt','w')
 for y in range(2013, 2014):
     for m in range(1,4): # first number is starting month, last number needs to be one more than final month
         url = 'http://labs.adsabs.harvard.edu/adsabs/api/search/?q=bibgroup:cfa,pubdate:'+str(y)+'-'+str(m)+'&rows=200&fl=keyword&fmt=json&dev_key='+str(devkey)
