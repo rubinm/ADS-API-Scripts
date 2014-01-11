@@ -6,9 +6,6 @@ import nltk
 from nltk.tokenize import LineTokenizer
 import csv
 import time
-import pprint
-import matplotlib
-import pandas
 import codecs
 import cStringIO
 
