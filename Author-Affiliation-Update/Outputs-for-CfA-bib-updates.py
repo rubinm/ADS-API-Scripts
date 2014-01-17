@@ -15,11 +15,11 @@ def alphabets2(affiliations):
     N=len(affiliations)
     maxmodulus = N / 26
     maxsecondletter =  N % 26
-    if N % 26 ==0:
+    if maxsecondletter == 0:
         howmanytimes=range(maxmodulus)
     else:
         howmanytimes=range(maxmodulus+1)
-    j=0
+    j=1
     for i in howmanytimes:
         firstletter = standard_mapping[i]
         if i==(len(howmanytimes) - 1 ) and maxsecondletter!=0:
@@ -27,9 +27,12 @@ def alphabets2(affiliations):
         else:
             letters = [firstletter+standard_mapping[k] for k in range(26)]
         for l in letters:
-            out = l+'('+affiliations[j].strip()+')'
-            outs.append(out)
-            j=j+1
+            try:
+                out = l+'('+affiliations[j].strip()+')'
+                outs.append(out)
+                j=j+1
+            except IndexError:
+                pass
     return outs
 
 #/end Rahul's script
@@ -51,7 +54,7 @@ def cleanup(stuff):
 
 #This creates and writes a file called "metadata_updates(timestamp).txt" that will list all author/affiliation updates marked on checkaffil.csv
 
-timestamp = datetime.now().strftime("%Y_%m_%d_%H%M")
+timestamp = datetime.now().strftime("%Y_%m%d_%H%M")
 
 metadata_updates = open('cfametadata_updates'+timestamp+'.txt', 'w')
 
@@ -61,62 +64,26 @@ with open('checkaffil.csv', 'rb') as f:
         #print row
         if '%Rc' in row:
             row.pop(2)
-            joined = ''
-            bib = (', ').join(row)
-            bibcodes = bib.replace('%Rc,','%R')
-            data1=bibcodes.strip("; ")
-            data=data1.strip(", ")
+            bib = ('; ').join(row)
+            bibcodes = bib.replace('%Rc;','%R')
+            data=bibcodes.strip("; ")
             print data
             metadata_updates.write(data+'\n')  
             
-        elif '%Ac' in row:
-            joined = ''
+        elif '%Ac' in row or '%Ax' in row:
             auth = ('; ').join(row)
-            authors = auth.replace('%Ac;','*%A')
-            data1=authors.strip("; ")
-            data=data1.strip(", ")
-            cleaned = cleanup(data)
+            authors = auth.replace('%Ac;','*%A').replace('%Ax;','%A')
+            data=authors.strip("; ")
+            cleaned = cleanup(data) #removes common errors, such as double spaces, as writen in the above cleanup function
             print cleaned
             metadata_updates.write(cleaned+'\n')  
 
-        elif '%Ax' in row: #marked Ax if the author field was not updated, but Louise wants in the file
-            joined = ''
-            auth = ('; ').join(row)
-            authors = auth.replace('%Ax;','%A')
-            data1=authors.strip("; ")
-            data=data1.strip(", ")
-            cleaned = cleanup(data)
-            print cleaned
-            metadata_updates.write(cleaned+'\n')  
-
-        elif '%Fc' in row:
-            a=row
-            #print a
-            a.pop(0)
-            outside=[]
-            h=alphabets2(a) #uses Rahul's above function
+        elif '%Fc' in row or '%Fx' in row:
+            h=alphabets2(row) #uses Rahul's above function
             h=[e for e in h if e[-2:]!='()'] #more code from Rahul!
-            data =  ['%Fc']+h
-            joined = ''
-            affil = (', ').join(data)
-            data = affil.replace('%Fc,','*%F')
-            cleaned = cleanup(data)
-            print cleaned
-            metadata_updates.write(cleaned+'\n')  
-            metadata_updates.write('\n')
-            
-        elif '%Fx' in row: #marked Fx if the affiliation field was not updated, but Louise wants in the file
-            a=row
-            #print a
-            a.pop(0)
-            outside=[]
-            h=alphabets2(a) #uses Rahul's above function
-            h=[e for e in h if e[-2:]!='()'] #more code from Rahul!
-            data =  ['%Fx']+h
-            joined = ''
-            affil = (', ').join(data)
-            data = affil.replace('%Fx,','%F')
-            cleaned = cleanup(data)
+            affil = (', ').join(h)
+            data = (row[0]+" "+affil).replace('%Fc','*%F').replace('%Fx','%F')
+            cleaned = cleanup(data) #removes common errors, such as double spaces, as writen in the above cleanup function
             print cleaned
             metadata_updates.write(cleaned+'\n')  
             metadata_updates.write('\n')
@@ -132,24 +99,12 @@ with open('checkaffil.csv', 'rb') as f:
     reader = csv.reader(f)
     for row in reader:
         
-        if '%Rc' in row:
+        if '%Rc' in row or '%R' in row:
             try:
                 if 'x' in row[2]:
                     row.pop(2)
                     bib = (', ').join(row)
-                    bibcodes = bib.replace('%Rc,','')
-                    data=bibcodes.strip(", ")
-                    print data
-                    cfabib_updates.write(data+'\n') #writing bibcode
-            except IndexError:
-                pass         
-        
-        if '%R' in row:
-            try:
-                if 'x' in row[2]: #checks to see if any are marked for bibcode
-                    row.pop(2)
-                    bib = (', ').join(row)
-                    bibcodes = bib.replace('%R,','')
+                    bibcodes = bib.replace('%Rc,','').replace('%R,','')
                     data=bibcodes.strip(", ")
                     print data
                     cfabib_updates.write(data+'\n') #writing bibcode
