@@ -54,7 +54,7 @@ for i in bibcode_lines:
         authors = k['author']   
         wr.writerow(['%A']+authors)
     except KeyError:
-        wr.writerow([''])
+        wr.writerow(['%A'])
     
     try:
         affil = k['aff']   
