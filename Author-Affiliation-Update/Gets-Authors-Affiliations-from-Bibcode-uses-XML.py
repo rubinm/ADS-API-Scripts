@@ -72,7 +72,7 @@ def parse_balanced_affiliations(string):
 bibcodes = open('bibcodes.txt').read() #reads from a file that has one bibcode per line
 bibcode_lines = bibcodes.splitlines()
 
-resultFile = open("checkaffil-xml.csv",'wb') #creates and writes (overwrites) this file
+resultFile = open("checkaffil.csv",'wb') #creates and writes (overwrites) this file
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
 for i in bibcode_lines:
