@@ -54,12 +54,13 @@ def cleanup(stuff):
 
 #This creates and writes a file called "metadata_updates(timestamp).txt" that will list all author/affiliation updates marked on checkaffil.csv
 
-timestamp = datetime.now().strftime("%Y_%m%d_%H%M")
+timestamp = datetime.now().strftime("_%Y_%m%d_%H%M")
 
 metadata_updates = open('cfametadata_updates'+timestamp+'.txt', 'w')
 
 with open('checkaffil.csv', 'rb') as f:
     reader = csv.reader(f)
+    print "bibcodes that are being updated"
     for row in reader:
         #print row
         if '%Rc' in row:
@@ -74,8 +75,7 @@ with open('checkaffil.csv', 'rb') as f:
             auth = ('; ').join(row)
             authors = auth.replace('%Ac;','*%A').replace('%Ax;','%A')
             data=authors.strip("; ")
-            cleaned = cleanup(data) #removes common errors, such as double spaces, as writen in the above cleanup function
-            print cleaned
+            cleaned = cleanup(data) #removes common errors as writen in the above cleanup function
             metadata_updates.write(cleaned+'\n')  
 
         elif '%Fc' in row or '%Fx' in row:
@@ -83,8 +83,7 @@ with open('checkaffil.csv', 'rb') as f:
             h=[e for e in h if e[-2:]!='()'] #more code from Rahul!
             affil = (', ').join(h)
             data = (row[0]+" "+affil).replace('%Fc','*%F').replace('%Fx','%F')
-            cleaned = cleanup(data) #removes common errors, such as double spaces, as writen in the above cleanup function
-            print cleaned
+            cleaned = cleanup(data) #removes common errors as writen in the above cleanup function
             metadata_updates.write(cleaned+'\n')  
             metadata_updates.write('\n')
 
@@ -92,11 +91,12 @@ metadata_updates.close()
 
 #This creates and writes a file called "cfabib(timestamp).txt" that will list all bibcodes marked on checkaffil.csv
 
-filename = 'cfabib_updates_'+timestamp+'.txt'
+filename = 'cfabib_updates'+timestamp+'.txt'
 cfabib_updates = open(filename, 'w')
 
 with open('checkaffil.csv', 'rb') as f:
     reader = csv.reader(f)
+    print "\nbibcodes to add to CfA Bib"
     for row in reader:
         
         if '%Rc' in row or '%R' in row:

@@ -72,7 +72,7 @@ def parse_balanced_affiliations(string):
 bibcodes = open('bibcodes.txt').read() #reads from a file that has one bibcode per line
 bibcode_lines = bibcodes.splitlines()
 
-resultFile = open("checkaffil.csv",'wb') #creates and writes (overwrites) this file
+resultFile = open("checkaffil-xml.csv",'wb') #creates and writes (overwrites) this file
 wr = UnicodeWriter(resultFile,dialect='excel',quoting=csv.QUOTE_ALL)
 
 for i in bibcode_lines:
@@ -105,8 +105,7 @@ for i in bibcode_lines:
         affil1 = parse_balanced_affiliations(a) #uses the code from Alberto
         c = []
         for key,value in affil1.iteritems():
-            temp = value
-            c.append(temp)    
+            c.append(value)    
         wr.writerow(['%F']+c) #write affiliation list
     else:
         wr.writerow(['%F']) #write affiliation list
