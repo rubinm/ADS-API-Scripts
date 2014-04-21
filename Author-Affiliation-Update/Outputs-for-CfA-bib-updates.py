@@ -54,7 +54,7 @@ def cleanup(stuff):
 
 #This creates and writes a file called "metadata_updates(timestamp).txt" that will list all author/affiliation updates marked on checkaffil.csv
 
-timestamp = datetime.now().strftime("_%Y_%m%d_%H%M")
+timestamp = datetime.now().strftime("%Y_%m%d_%H%M")
 
 metadata_updates = open('cfametadata_updates'+timestamp+'.txt', 'w')
 
