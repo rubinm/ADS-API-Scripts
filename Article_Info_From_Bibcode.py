@@ -3,13 +3,41 @@
 import requests
 import json
 import time
-from unidecode import unidecode
+import csv
+import codecs
+import cStringIO
+from datetime import datetime
+#from unidecode import unidecode
+
+#UnicodeWriter from http://docs.python.org/2/library/csv.html#examples
+class UnicodeWriter:
+    def __init__(self, f, dialect=csv.excel, encoding="utf-8-sig", **kwds):
+        self.queue = cStringIO.StringIO()
+        self.writer = csv.writer(self.queue, dialect=dialect, **kwds)
+        self.stream = f
+        self.encoder = codecs.getincrementalencoder(encoding)()
+    def writerow(self, row):
+        self.writer.writerow([s.encode("utf-8") for s in row])
+        data = self.queue.getvalue()
+        data = data.decode("utf-8")
+        data = self.encoder.encode(data)
+        self.stream.write(data)
+        self.queue.truncate(0)
+
+    def writerows(self, rows):
+        for row in rows:
+            self.writerow(row)
+#/end UnicodeWriter
 
 devkey = (open('dev_key.txt','r')).read()
 
 #you need to start with a text file containing a list of bibcodes
-bib = open('cfa_bib_list.txt').read()
-w = open('abstract.txt','w') #will create or overwrite this file name
+bib = open('bibcodes.txt').read()
+
+timestamp = datetime.now().strftime("%Y_%m%d_%H%M")
+
+fileout = codecs.open('article_info'+timestamp+'.csv','wb') #will create or overwrite this file name
+wr = UnicodeWriter(fileout,lineterminator='\n', delimiter=',', dialect='excel',quoting=csv.QUOTE_ALL)
 
 bib1 = bib.splitlines()
 bib_lines = [x.strip() for x in bib1]
@@ -18,61 +46,53 @@ for i in bib_lines:
     url = 'http://labs.adsabs.harvard.edu/adsabs/api/record/'+i+'?fmt=json&dev_key='+str(devkey)
     
 #this section resets each variable to blank every time the script runs through the loop
-    authors = ''
-    title = ''
-    affil = ''
-    year = ''
-    pub = ''
-    abstract = ''
+    print url
     
     content = requests.get(url)
     k=content.json()
+    try:
+        year = k['year']
+    except KeyError:
+        year = ''
 
-    year = k['year']
-    w.write(year+'|')
-    
-#these "try,except" pairs will try to get the information from the article, but if it doesn't exist will just pass the blank variable as assigned above
     try:
         pub = k['pub']
-        w.write(pub+'|')
     except KeyError:
-        w.write(pub+'|')
-    
+        pub = ''
+
     try:
         title = k['title']
-        title2 = '; '.join(title)
-        cleantitle = title2.encode('ascii', 'ignore') #this ignores non-ascii characters
-        w.write(cleantitle+'|')
     except KeyError:
-        w.write(title+'|')
-    
+        title = ''
+
     try:
-        authors = k['author']
-        author2 = '; '.join(authors)
-        cleanauthors = author2.encode('ascii', 'ignore')
-        w.write(cleanauthors+'|')
+        author = k['author']
+        authors = '; '.join(author)
     except KeyError:
-        w.write(authors+'|')
- 
-    try:        
-        affil = k['aff']
-        affil2 = '; '.join(affil)
-        cleanaffil = affil2.encode('ascii', 'ignore')
-        w.write(cleanaffil+'|')
+        authors = ''
+
+    try:
+        aff = k['aff']
+        affil = '; '.join(aff)
     except KeyError:
-        w.write(affil+'|')
-    
+        affil = ''
+
     try:
         abstract = k['abstract']
-        cleanabstract = abstract.encode('ascii', 'ignore')
-        w.write(cleanabstract+'|')
     except KeyError:
-        w.write(abstract+'|')
+        abstract = ''
 
-    print i #prints the bibcode as the script runs in order to track progress and locate errors
+    try:
+        keyword = k['keyword']
+        keywords = '; '.join(keyword)
+    except KeyError:
+        keywords = ''
+
+    print i
     
-    w.write(i+'\n')  #the last variable write needs to end with a \n instead of the delimiter |
+    wr.writerow([year]+[pub]+title+[authors]+[affil]+[abstract]+[keywords]+[i]+['\r'])
     
-    time.sleep(2)
-print 'finished getting the informtion'
-w.close()
+    time.sleep(.25)
+
+print 'Katie\'s awesome script has just made your life a little easier.'
+fileout.close()
